@@ -16,8 +16,27 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from user import router as user_api_router
+from django.conf import settings
+
+
+
+auth_url_patterns = [
+    path(r'', include('rest_framework_social_oauth2.urls')),
+    path(r'o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+]
+
+
+if settings.DEBUG:
+    auth_url_patterns.append(path(r'verify/', include('rest_framework.urls')))
+
+api_url_patterns = [
+    path(r'accounts/', include(user_api_router.router.urls)),
+    path(r'auth/', include(auth_url_patterns)),
+]
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('user/', include('user.urls')),
+    path('', include(api_url_patterns)),
 ]
